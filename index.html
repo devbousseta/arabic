@@ -1,4 +1,3 @@
-
 <!DOCTYPE HTML>
 
 <html>
@@ -250,11 +249,12 @@ function setLang(langid) {    //a function to change the language of the interfa
 </script>
   <style type="text/css">
   body {
-    background-color: #f4f4f4;
+    background-color: #f8f9fa;
     font-family: 'Noto Kufi Arabic', sans-serif !important;
-
-  
-  }  
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 60px;
+  }
   .big {font-weight: bold;}
   .kbrow {padding: 3px 0;}
   .flat {
@@ -283,16 +283,22 @@ function setLang(langid) {    //a function to change the language of the interfa
   .btn150 {width: 22.5%;}
   .btn200 {width: 29.7%;}
   .inpbox, .outbox {
-    border:1px solid #c3c3c3;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
     font-family: 'Noto Kufi Arabic', sans-serif !important;
-    width: 99%;
-    padding: 4px;
+    width: 100%;
+    padding: 15px;
     height: 400px;
     background-color: #ffffff;
-    color: #000000;
-    
+    color: #212529;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
   }
-
+  .inpbox:focus, .outbox:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: 0;
+  }
   table {width: 100%;}
   textarea {resize: none;}
   input {cursor: hand; cursor: pointer;}
@@ -326,20 +332,62 @@ function setLang(langid) {    //a function to change the language of the interfa
   p, ul {margin: 5px;}
   ul {padding: 0 15px 0 15px;}
   footer {
-            background-color: #4B4D52;
-            color: white;
-            text-align: center;
-            font-size: 15px;
-            position: fixed;
-            bottom: 0;
-            padding: 5px;
-            width: 100%;
-        }
+    background-color: #343a40;
+    color: #f8f9fa;
+    text-align: center;
+    padding: 15px;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+  }
+  .page-title {
+    color: #343a40;
+    margin-bottom: 2rem;
+    font-weight: bold;
+  }
+  .btn-danger {
+    transition: all 0.3s ease;
+  }
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.1);
+  }
   @media (max-width: 600px) { body {font-size: 0.7rem;} }
   @media (min-width: 600px) { body {font-size: 0.7rem;} }
   @media (min-width: 800px) { body {font-size: 1.0rem;} }
   @media (min-width: 1000px) { body {font-size: 1.25rem;} }
   @media (min-width: 1200px) { body {font-size: 1.5rem;} }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  .copy-btn:hover {
+    transform: translateY(-2px);
+  }
+  .char-count {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    color: #6c757d;
+    background: rgba(255,255,255,0.9);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .copy-success {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    display: none;
+    z-index: 1000;
+  }
   </style>
 </head>
 
@@ -348,36 +396,47 @@ function setLang(langid) {    //a function to change the language of the interfa
 
 <body onload="setLang(defLang);">  <!-- after page is loaded, apply the default language -->
   <form name="writer" id="writer" action="#" class="center">
-
- 
-  <h2 align="center" class=" mt-5">برنامج العربية المعكوسة </h2>
-   <div class="row m-4">
-    <div class="col-md mt-2">
-      <!-- Output Box -->
-      <textarea dir="rtl" name="outbox" id="outbox" class="form-control" rows="10" cols="50"  style=" font-size: 20px;  resize: vertical;"
-      placeholder=""  readonly></textarea>
-
-    </div>
-    <div class="col-md  mt-2">
-       <!-- Input Box -->
-       <textarea dir="rtl" name="inpbox" id="inpbox" class="form-control" rows="10" cols="50" style="font-size: 20px;resize: vertical;font-family: 'arial', sans-serif !important;"
-
-       placeholder="ضع نصك هنا ..."
-       ></textarea>
-    </div>
-   </div>
+    <h2 class="page-title text-center mt-5">برنامج العربية المعكوسة</h2>
     
-    <br />
-
-    <!-- Start Control Buttons -->
-    <div class="kbrow">
-      <button id="emptyTextarea"   class="btn btn-danger px-5 py-2 mb-5"  > مسح <i class="fa-solid fa-rotate-right"></i>  </button>
+    <div class="container">
+      <div class="row m-4">
+        <div class="col-md-6 mt-2">
+          <div class="form-group">
+            <label class="mb-2">النص الناتج:</label>
+            <div class="position-relative">
+              <textarea dir="rtl" name="outbox" id="outbox" class="outbox" readonly></textarea>
+              <button class="btn btn-primary copy-btn" id="copyButton">
+                <i class="fas fa-copy"></i>
+              </button>
+              <small class="char-count" id="outputCount">0 حرف</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 mt-2">
+          <div class="form-group">
+            <label class="mb-2">النص المدخل:</label>
+            <div class="position-relative">
+              <textarea dir="rtl" name="inpbox" id="inpbox" class="inpbox" 
+                placeholder="ضع نصك هنا ..."></textarea>
+              <small class="char-count" id="inputCount">0 حرف</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mb-5">
+        <button id="emptyTextarea" class="btn btn-danger px-5 py-2">
+          <i class="fa-solid fa-rotate-right me-2"></i>مسح
+        </button>
+      </div>
     </div>
   </form>
+
   <footer>
-    <!-- Your footer content goes here -->
-    <div> Made with <li class="fa fa-heart"></li> By YassTechNo</div>
-</footer>
+    <div class="container">
+      <span>Made with <i class="fa fa-heart text-danger"></i> By YassTechNo</span>
+    </div>
+  </footer>
 </body>
 
 <!-- =============================== BodySECTION ======================================== -->
@@ -527,6 +586,52 @@ function setLang(langid) {    //a function to change the language of the interfa
   }
   frm.outbox.value=old+frm.outbox.value;  //put together the old text and the last sentence
 
+});
+
+// إضافة عداد الأحرف
+function updateCharCount() {
+  const input = document.getElementById('inpbox');
+  const output = document.getElementById('outbox');
+  const inputCount = document.getElementById('inputCount');
+  const outputCount = document.getElementById('outputCount');
+  
+  inputCount.textContent = input.value.length + ' حرف';
+  outputCount.textContent = output.value.length + ' حرف';
+}
+
+// نسخ النص
+document.getElementById('copyButton').addEventListener('click', function() {
+  const output = document.getElementById('outbox');
+  navigator.clipboard.writeText(output.value).then(() => {
+    // إظهار رسالة النجاح
+    const successMsg = document.createElement('div');
+    successMsg.className = 'copy-success';
+    successMsg.textContent = 'تم النسخ بنجاح!';
+    document.body.appendChild(successMsg);
+    
+    // إظهار وإخفاء الرسالة
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.opacity = '0';
+      setTimeout(() => {
+        successMsg.remove();
+      }, 300);
+    }, 2000);
+  });
+});
+
+// تحديث عداد الأحرف عند الكتابة
+document.getElementById('inpbox').addEventListener('input', updateCharCount);
+document.getElementById('outbox').addEventListener('input', updateCharCount);
+
+// تأكيد المسح
+document.getElementById('emptyTextarea').addEventListener('click', function(e) {
+  e.preventDefault();
+  if(confirm('هل أنت متأكد من رغبتك في مسح النص؟')) {
+    document.getElementById('inpbox').value = '';
+    document.getElementById('outbox').value = '';
+    updateCharCount();
+  }
 });
 </script>
 </html>
